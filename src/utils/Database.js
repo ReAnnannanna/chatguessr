@@ -1,6 +1,6 @@
 'use strict';
 
-const SQLite = require('@paulrosania/better-sqlite3');
+const SQLite = require('better-sqlite3');
 const { randomUUID } = require('crypto');
 
 /** @typedef {import('../types').LatLng} LatLng */
