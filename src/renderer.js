@@ -2,7 +2,7 @@
 
 require("./utils/extenssrMenuItemsPlugin");
 
-const DeckGL = require('@deck.gl/google-maps');
+const { GoogleMapsOverlay } = require('@deck.gl/google-maps');
 const { ArcLayer } = require('@deck.gl/layers');
 
 window.chatguessrApi.init({
@@ -26,7 +26,7 @@ const satelliteCanvas = document.createElement("div");
 satelliteCanvas.id = "satelliteCanvas";
 
 const mapReady = hijackMap();
-const deckgl = new DeckGL();
+const deckgl = new GoogleMapsOverlay();
 
 /** @type {google.maps.Marker[]} */
 let markers = [];
