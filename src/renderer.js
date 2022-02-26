@@ -70,13 +70,21 @@ function populateMap(location, scores) {
 		pickable: true,
 		iconAtlas: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png',
 		iconMapping: {
-			marker: {x: 0, y: 0, width: 128, height: 128, mask: true}
+			marker: {
+				x: 0,
+				y: 0,
+				width: 128,
+				height: 128,
+				mask: true,
+				anchorX: 64,
+				anchorY: 128,
+			}
 		},
 		getIcon: () => 'marker',
 
-		sizeScale: 15,
+		sizeScale: 1,
 		getPosition: (score) => [score.position.lng, score.position.lat],
-		getSize: (score) => 5,
+		getSize: (score) => 36,
 		getColor: (score) => toRgb(score.color, 255)
 	});
 	deckgl.setProps({
