@@ -3,7 +3,7 @@
 require("./utils/extenssrMenuItemsPlugin");
 
 const { GoogleMapsOverlay } = require('@deck.gl/google-maps');
-const { ArcLayer } = require('@deck.gl/layers');
+const { ArcLayer, IconLayer } = require('@deck.gl/layers');
 
 window.chatguessrApi.init({
 	populateMap,
@@ -27,9 +27,6 @@ satelliteCanvas.id = "satelliteCanvas";
 
 const mapReady = hijackMap();
 const deckgl = new GoogleMapsOverlay();
-
-/** @type {google.maps.Marker[]} */
-let markers = [];
 
 /**
  * @param {string} hexColor
@@ -60,6 +57,7 @@ function populateMap(location, scores) {
 	};
 	const linesLayer = new ArcLayer({
 		data: scores,
+		greatCircle: true,
 		pickable: false,
 		getWidth: 4,
 		getSourceColor: (score) => toRgb(score.color, 0.6 * 255),
@@ -67,8 +65,22 @@ function populateMap(location, scores) {
 		getSourcePosition: (score) => [score.position.lng, score.position.lat],
 		getTargetPosition: [location.lng, location.lat],
 	});
+	const markersLayer = new IconLayer({
+		data: scores,
+		pickable: true,
+		iconAtlas: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png',
+		iconMapping: {
+			marker: {x: 0, y: 0, width: 128, height: 128, mask: true}
+		},
+		getIcon: () => 'marker',
+
+		sizeScale: 15,
+		getPosition: (score) => [score.position.lng, score.position.lat],
+		getSize: (score) => 5,
+		getColor: (score) => toRgb(score.color, 255)
+	});
 	deckgl.setProps({
-		layers: [linesLayer],
+		layers: [linesLayer, markersLayer],
 	});
 	deckgl.setMap(map);
 
@@ -80,13 +92,13 @@ function populateMap(location, scores) {
 	locationMarker.addListener("click", () => {
 		window.open(`http://maps.google.com/maps?q=&layer=c&cbll=${location.lat},${location.lng}`, "_blank");
 	});
-	markers.push(locationMarker);
 
 	icon.scale = 1;
 	scores.forEach((score, index) => {
 		const color = index == 0 ? "#E3BB39" : index == 1 ? "#C9C9C9" : index == 2 ? "#A3682E" : score.color;
 		icon.fillColor = color;
 
+		/*
 		const guessMarker = new google.maps.Marker({
 			position: score.position,
 			icon,
@@ -108,6 +120,7 @@ function populateMap(location, scores) {
 			infowindow.close();
 		});
 		markers.push(guessMarker);
+		*/
 	});
 }
 
@@ -115,10 +128,6 @@ function populateMap(location, scores) {
 function clearMarkers() {
 	deckgl.setMap(null);
 	deckgl.setProps({ layers: [] });
-	for (const marker of markers) {
-		marker.setMap(null);
-	}
-	markers = [];
 }
 
 async function hijackMap() {
