@@ -35,7 +35,7 @@ let markers = [];
  * @param {string} hexColor
  * @param {number} [alpha]
  */
-function toRgb(hexColor, alpha = 1) {
+function toRgb(hexColor, alpha = 255) {
 	const r = parseInt(hexColor.slice(1, 3), 16);
 	const g = parseInt(hexColor.slice(3, 5), 16);
 	const b = parseInt(hexColor.slice(5, 7), 16);
@@ -62,8 +62,8 @@ function populateMap(location, scores) {
 		data: scores,
 		pickable: false,
 		getWidth: 4,
-		getSourceColor: (score) => toRgb(score.color, 0.6),
-		getTargetColor: (score) => toRgb(score.color, 0.6),
+		getSourceColor: (score) => toRgb(score.color, 0.6 * 255),
+		getTargetColor: (score) => toRgb(score.color, 0.6 * 255),
 		getSourcePosition: (score) => [score.position.lng, score.position.lat],
 		getTargetPosition: [location.lng, location.lat],
 	});
