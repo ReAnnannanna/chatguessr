@@ -2,6 +2,9 @@
 
 require("./utils/extenssrMenuItemsPlugin");
 
+const DeckGL = require('@deck.gl/google-maps');
+const { ArcLayer } = require('@deck.gl/layers');
+
 window.chatguessrApi.init({
 	populateMap,
 	clearMarkers,
@@ -23,11 +26,21 @@ const satelliteCanvas = document.createElement("div");
 satelliteCanvas.id = "satelliteCanvas";
 
 const mapReady = hijackMap();
+const deckgl = new DeckGL();
 
 /** @type {google.maps.Marker[]} */
 let markers = [];
-/** @type {google.maps.Polyline[]} */
-let polylines = [];
+
+/**
+ * @param {string} hexColor
+ * @param {number} [alpha]
+ */
+function toRgb(hexColor, alpha = 1) {
+	const r = parseInt(hexColor.slice(1, 3), 16);
+	const g = parseInt(hexColor.slice(3, 5), 16);
+	const b = parseInt(hexColor.slice(5, 7), 16);
+	return [r, g, b, alpha];
+}
 
 /** @type {import('./types').RendererApi['populateMap']} */
 function populateMap(location, scores) {
@@ -45,6 +58,19 @@ function populateMap(location, scores) {
 		anchor: new google.maps.Point(14, 43),
 		labelOrigin: new google.maps.Point(13.5, 15),
 	};
+	const linesLayer = new ArcLayer({
+		data: scores,
+		pickable: false,
+		getWidth: 4,
+		getSourceColor: (score) => toRgb(score.color, 0.6),
+		getTargetColor: (score) => toRgb(score.color, 0.6),
+		getSourcePosition: (score) => [score.position.lng, score.position.lat],
+		getTargetPosition: [location.lng, location.lat],
+	});
+	deckgl.setProps({
+		layers: [linesLayer],
+	});
+	deckgl.setMap(map);
 
 	const locationMarker = new google.maps.Marker({
 		position: location,
@@ -82,30 +108,17 @@ function populateMap(location, scores) {
 			infowindow.close();
 		});
 		markers.push(guessMarker);
-
-		polylines.push(
-			new google.maps.Polyline({
-				strokeColor: color,
-				strokeWeight: 4,
-				strokeOpacity: 0.6,
-				geodesic: true,
-				map,
-				path: [score.position, location],
-			})
-		);
 	});
 }
 
 /** @type {import('./types').RendererApi['clearMarkers']} */
 function clearMarkers() {
+	deckgl.setMap(null);
+	deckgl.setProps({ layers: [] });
 	for (const marker of markers) {
 		marker.setMap(null);
 	}
-	for (const line of polylines) {
-		line.setMap(null);
-	}
 	markers = [];
-	polylines = [];
 }
 
 async function hijackMap() {

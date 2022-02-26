@@ -8,6 +8,8 @@
 	"main": "./dist/cg-main/main.js",
 	"repository": "https://github.com/tzhf/chatguessr",
 	"dependencies": {
+		"@deck.gl/google-maps": "^8.7.0",
+		"@deck.gl/layers": "^8.7.0",
 		"@paulrosania/better-sqlite3": "^8.1.0",
 		"@sentry/electron": "^3.0.0",
 		"@supabase/supabase-js": "^1.33.3",
