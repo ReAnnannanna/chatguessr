@@ -152,6 +152,12 @@ const migrations = [
             FOREIGN KEY(user_id) REFERENCES users(id)
 		  )`).run();
 	 },
+	 function createStatIndexes(db) {
+		  db.prepare(`CREATE INDEX guess_score ON guesses(score)`).run();
+		  db.prepare(`CREATE INDEX guess_streak ON guesses(streak)`).run();
+		  db.prepare(`CREATE INDEX guess_created_at ON guesses(created_at)`).run();
+		  db.prepare(`CREATE INDEX streak_created_at ON streaks(created_at)`).run();
+	 },
 ];
 
 class Database {
