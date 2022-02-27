@@ -21,9 +21,7 @@ function getOrMigrateUser(db, userId, username, displayName) {
 
     if (!dbUser && user) {
         dbUser = db.migrateUser(userId, displayName, user);
-        // Deleting users from the store loses historical stats (as read by other functions in this file)
-        // so we should NOT enable this line.
-        // store.delete(`users.${username}`);
+        store.delete(`users.${username}`);
     } else {
         dbUser = db.getOrCreateUser(userId, displayName);
     }
@@ -89,33 +87,14 @@ function getGlobalStats(db) {
  * @returns {ReturnType<import('./Database')['getUserStats']>}
  */
 function getUserStats(db, userId, username) {
-    const userInfo = db.getUserStats(userId);
-    /** @type {import('./sharedStore').LegacyUser} */
-    const legacyUserInfo = store.get(`users.${username}`)
-    if (!userInfo) {
-        return legacyUserInfo;
-    }
-    if (!legacyUserInfo) {
-        return userInfo;
-    }
+	const userInfo = db.getUserStats(userId);
+	/** @type {import('./sharedStore').LegacyUser} */
+	const legacyUserInfo = store.get(`users.${username}`)
+	if (!userInfo) {
+		return legacyUserInfo;
+	}
 
-    let { bestStreak, correctGuesses, nbGuesses, meanScore, victories, perfects } = userInfo;
-    bestStreak = Math.max(bestStreak, legacyUserInfo.bestStreak);
-    correctGuesses += legacyUserInfo.correctGuesses;
-    nbGuesses += legacyUserInfo.nbGuesses;
-    meanScore = (legacyUserInfo.meanScore * legacyUserInfo.nbGuesses + userInfo.meanScore * userInfo.nbGuesses) / nbGuesses;
-    victories += legacyUserInfo.victories;
-    perfects += legacyUserInfo.perfects;
-
-    return {
-        ...userInfo,
-        bestStreak,
-        correctGuesses,
-        nbGuesses,
-        meanScore,
-        victories,
-        perfects,
-    };
+	return userInfo;
 }
 
 module.exports = { getOrMigrateUser, getGlobalStats, getUserStats };

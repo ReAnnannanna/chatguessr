@@ -12,6 +12,16 @@ let db;
 
 beforeEach(() => {
     db = new Database(':memory:');
+	 db.createGame(/** @type {any} */ ({
+		  token: 'test',
+		  map: 'test',
+		  mapName: 'test',
+		  bounds: {},
+		  forbidMoving: true,
+		  forbidRotating: false,
+		  forbidZooming: false,
+		  timeLimit: 0,
+	 }));
     store.setData({});
 });
 
@@ -56,6 +66,61 @@ describe('getOrMigrateUser', () => {
             flag: 'jo',
         });
     });
+
+    it('migrates stats from the json store', () => {
+        store.setData({
+            users: {
+                libreanna: {
+                    user: 'libreanna',
+                    correctGuesses: 47,
+                    nbGuesses: 69,
+                    bestStreak: 8,
+                    perfects: 3,
+                    victories: 2,
+                },
+            },
+        });
+
+        const { dbUser } = getOrMigrateUser(db, '1234567', 'libreanna', 'LibReAnna');
+        expect(dbUser).toMatchObject({
+            id: '1234567',
+            username: 'LibReAnna',
+        });
+		  // Just the stats from the JSON store
+		  expect(getUserStats(db, '1234567', 'libreanna')).toMatchObject({
+				correctGuesses: 47,
+				nbGuesses: 69,
+				bestStreak: 8,
+				perfects: 3,
+				victories: 2,
+		  });
+
+		  // Combined stats from the database + migrated from JSON store
+		  const roundId = db.createRound('test', /** @type {any} */ ({
+				lat: 0,
+				lng: 0,
+				panoId: null,
+				heading: 0,
+				pitch: 0,
+		  }));
+		  db.createGuess(roundId, '1234567', {
+				color: '#fff',
+				flag: 'jo',
+				location: { lat: 0, lng: 0 },
+				country: 'GH',
+				streak: 7,
+				distance: 1,
+				score: 5000,
+		  });
+
+		  expect(getUserStats(db, '1234567', 'libreanna')).toMatchObject({
+				correctGuesses: 48,
+				nbGuesses: 70,
+				bestStreak: 8,
+				perfects: 4,
+				victories: 2,
+		  });
+	 });
 });
 
 describe('getGlobalStats', () => {

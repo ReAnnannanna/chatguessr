@@ -13,6 +13,14 @@ class MockStore {
     get (path) {
         return path.split('.').reduce((data, prop) => data?.[prop] ?? null, this.#data);
     }
+    delete (path) {
+		  const objPath = path.split('.');
+		  const member = objPath.pop();
+        const obj = objPath.reduce((data, prop) => data?.[prop] ?? null, this.#data);
+		  if (obj && member) {
+				delete obj[member];
+		  }
+    }
 }
 
 module.exports = new MockStore();
