@@ -652,7 +652,7 @@ class Database {
                 flag,
                 COALESCE(current_streak.count, 0) AS current_streak,
                 MAX(
-                    legacy_stats.best_streak,
+                    COALESCE(legacy_stats.best_streak, 0),
                     (SELECT COALESCE(MAX(count), 0) FROM streaks WHERE user_id = :id AND updated_at > users.reset_at)
                 ) AS best_streak,
                 (
