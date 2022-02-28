@@ -138,26 +138,26 @@ const migrations = [
             ) top_scores ON completed_games.id = top_scores.game_id
         `).run();
     },
-	 function createLegacyStats(db) {
-		  db.prepare(`CREATE TABLE legacy_stats (
-				user_id TEXT PRIMARY KEY,
-				best_streak INT DEFAULT 0,
-				correct_guesses INT DEFAULT 0,
-				total_guesses INT DEFAULT 0,
-				perfects INT DEFAULT 0,
-				victories INT DEFAULT 0,
-				mean_score INT DEFAULT 0,
-				created_at INT DEFAULT 0,
+    function createLegacyStats(db) {
+        db.prepare(`CREATE TABLE legacy_stats (
+            user_id TEXT PRIMARY KEY,
+            best_streak INT DEFAULT 0,
+            correct_guesses INT DEFAULT 0,
+            total_guesses INT DEFAULT 0,
+            perfects INT DEFAULT 0,
+            victories INT DEFAULT 0,
+            mean_score INT DEFAULT 0,
+            created_at INT DEFAULT 0,
 
             FOREIGN KEY(user_id) REFERENCES users(id)
-		  )`).run();
-	 },
-	 function createStatIndexes(db) {
-		  db.prepare(`CREATE INDEX guess_score ON guesses(score)`).run();
-		  db.prepare(`CREATE INDEX guess_streak ON guesses(streak)`).run();
-		  db.prepare(`CREATE INDEX guess_created_at ON guesses(created_at)`).run();
-		  db.prepare(`CREATE INDEX streak_created_at ON streaks(created_at)`).run();
-	 },
+        )`).run();
+    },
+    function createStatIndexes(db) {
+        db.prepare(`CREATE INDEX guess_score ON guesses(score)`).run();
+        db.prepare(`CREATE INDEX guess_streak ON guesses(streak)`).run();
+        db.prepare(`CREATE INDEX guess_created_at ON guesses(created_at)`).run();
+        db.prepare(`CREATE INDEX streak_created_at ON streaks(created_at)`).run();
+    },
 ];
 
 class Database {
@@ -592,10 +592,10 @@ class Database {
             INSERT INTO users(id, username, flag, previous_guess, last_location)
             VALUES (:id, :username, :flag, :previousGuess, :lastLocation)
         `);
-		  const insertLegacyStats = this.#db.prepare(`
-				INSERT INTO legacy_stats (user_id, best_streak, correct_guesses, total_guesses, perfects, victories, mean_score, created_at)
-				VALUES (:id, :bestStreak, :correctGuesses, :totalGuesses, :perfects, :victories, :meanScore, :createdAt)
-		  `);
+        const insertLegacyStats = this.#db.prepare(`
+            INSERT INTO legacy_stats (user_id, best_streak, correct_guesses, total_guesses, perfects, victories, mean_score, created_at)
+            VALUES (:id, :bestStreak, :correctGuesses, :totalGuesses, :perfects, :victories, :meanScore, :createdAt)
+        `);
         insertUser.run({
             id: userId,
             username,
@@ -603,16 +603,16 @@ class Database {
             previousGuess: storeUser.previousGuess ? JSON.stringify(storeUser.previousGuess) : null,
             lastLocation: storeUser.lastLocation ? JSON.stringify(storeUser.lastLocation) : null,
         });
-		  insertLegacyStats.run({
-				id: userId,
-				bestStreak: storeUser.bestStreak,
-				correctGuesses: storeUser.correctGuesses,
-				totalGuesses: storeUser.nbGuesses,
-				perfects: storeUser.perfects,
-				victories: storeUser.victories,
-				meanScore: storeUser.meanScore,
-				createdAt: timestamp(),
-		  });
+        insertLegacyStats.run({
+            id: userId,
+            bestStreak: storeUser.bestStreak,
+            correctGuesses: storeUser.correctGuesses,
+            totalGuesses: storeUser.nbGuesses,
+            perfects: storeUser.perfects,
+            victories: storeUser.victories,
+            meanScore: storeUser.meanScore,
+            createdAt: timestamp(),
+        });
 
         return this.getUser(userId);
     }
@@ -652,29 +652,32 @@ class Database {
                 flag,
                 COALESCE(current_streak.count, 0) AS current_streak,
                 MAX(
-						  legacy_stats.best_streak,
-						  (SELECT COALESCE(MAX(count), 0) FROM streaks WHERE user_id = :id AND updated_at > users.reset_at)
-					 ) AS best_streak,
+                    legacy_stats.best_streak,
+                    (SELECT COALESCE(MAX(count), 0) FROM streaks WHERE user_id = :id AND updated_at > users.reset_at)
+                ) AS best_streak,
                 (
-						  COALESCE(legacy_stats.total_guesses, 0) +
-						  (SELECT COUNT(*) FROM guesses WHERE user_id = :id AND created_at > users.reset_at)
-					 ) AS total_guesses,
+                    COALESCE(legacy_stats.total_guesses, 0) +
+                    (SELECT COUNT(*) FROM guesses WHERE user_id = :id AND created_at > users.reset_at)
+                ) AS total_guesses,
                 (
-						  COALESCE(legacy_stats.correct_guesses, 0) +
+                    COALESCE(legacy_stats.correct_guesses, 0) +
                     (SELECT COUNT(*) FROM guesses WHERE user_id = :id AND streak > 0 AND created_at > users.reset_at)
-					 ) AS correct_guesses,
+                ) AS correct_guesses,
                 (
-						  COALESCE(legacy_stats.perfects, 0) +
+                    COALESCE(legacy_stats.perfects, 0) +
                     (SELECT COUNT(*) FROM guesses WHERE user_id = :id AND score = 5000 AND created_at > users.reset_at)
-					 ) AS perfects,
-                (SELECT AVG(score) FROM guesses WHERE user_id = users.id AND created_at > users.reset_at) AS average,
+                ) AS perfects,
                 (
-						  COALESCE(legacy_stats.victories, 0) +
+                    SELECT (legacy_stats.total_guesses * legacy_stats.mean_score + SUM(guesses.score)) / (legacy_stats.total_guesses + COUNT(guesses.score))
+                    FROM guesses WHERE user_id = :id AND created_at > users.reset_at
+                ) AS average,
+                (
+                    COALESCE(legacy_stats.victories, 0) +
                     (SELECT COUNT(*) FROM game_winners WHERE user_id = users.id)
                 ) AS victories
             FROM users
             LEFT JOIN streaks current_streak ON current_streak.id = users.current_streak_id
-				LEFT JOIN legacy_stats ON legacy_stats.user_id = users.id AND legacy_stats.created_at > users.reset_at
+            LEFT JOIN legacy_stats ON legacy_stats.user_id = users.id AND legacy_stats.created_at > users.reset_at
             WHERE users.id = :id
         `);
 
