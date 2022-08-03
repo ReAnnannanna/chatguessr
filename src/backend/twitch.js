@@ -1,9 +1,10 @@
-const { EventEmitter } = require("events");
-const TwitchClient = require("tmi.js").Client;
+import { EventEmitter } from "events";
+import { StaticAuthProvider } from "@twurple/auth";
+import { ChatClient } from "@twurple/chat";
 
 class TwitchBackend extends EventEmitter {
-	/** @type {TwitchClient} */
-	#tmi;
+	/** @type {ChatClient} */
+	#client;
 
 	#closing = false;
 
@@ -24,49 +25,41 @@ class TwitchBackend extends EventEmitter {
 		this.botUsername = options.botUsername;
 		this.channelName = options.channelName;
 
-		this.#tmi = new TwitchClient({
-			options: { debug: true, messagesLogLevel: "info" },
-			connection: {
-				secure: true,
-				reconnect: false,
-			},
-			identity: {
-				username: this.botUsername,
-				password: `oauth:${options.whisperToken}`,
-			},
+		this.#client = new ChatClient({
+			authProvider: new StaticAuthProvider(process.env.TWITCH_CLIENT_ID, options.whisperToken),
 			channels: [this.channelName],
 		});
 
-		this.#tmi.on("connected", () => {
+		this.#client.onConnect(() => {
 			this.emit("connected");
 		});
 
-		this.#tmi.on("disconnected", () => {
+		this.#client.onDisconnect(() => {
 			this.emit("disconnected", this.#closing);
 		});
 
-		this.#tmi.on("whisper", (_from, userstate, message, self) => {
+		this.#client.onWhisper((_username, message, { userInfo }) => {
 			if (self) return;
-			this.emit("guess", userstate, message);
+			this.emit("guess", userInfo, message);
 		});
 
-		this.#tmi.on("message", (_channel, userstate, message, self) => {
+		this.#client.onMessage((_channel, _username, message, { userInfo }) => {
 			if (self) return;
-			this.emit("message", userstate, message);
+			this.emit("message", userInfo, message);
 		});
 	}
 
 	async connect() {
-		await this.#tmi.connect();
+		await this.#client.connect();
 	}
 
 	async close() {
 		this.#closing = true;
-		await this.#tmi.disconnect();
+		await this.#client.quit();
 	}
 
 	isConnected() {
-		return this.#tmi.readyState() === "OPEN";
+		return this.#client.isConnected;
 	}
 
 	/**
@@ -75,9 +68,9 @@ class TwitchBackend extends EventEmitter {
 	 */
 	async sendMessage(message, options = {}) {
 		if (options.system) {
-			await this.#tmi.action(this.channelName, message);
+			await this.#client.action(this.channelName, message);
 		} else {
-			await this.#tmi.say(this.channelName, message);
+			await this.#client.say(this.channelName, message);
 		}
 	}
 }

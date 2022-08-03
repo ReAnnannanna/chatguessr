@@ -313,7 +313,7 @@ class GameHandler {
 	}
 
 	/**
-	 * @param {import("tmi.js").ChatUserstate} userstate
+	 * @param {import("@twurple/chat").ChatUser} userstate
 	 * @param {string} message
 	 */
 	async #handleGuess(userstate, message) {
@@ -366,7 +366,7 @@ class GameHandler {
 	#cgCooldown = false;
 
 	/**
-	 * @param {import("tmi.js").ChatUserstate} userstate
+	 * @param {import("@twurple/chat").ChatUser} userstate
 	 * @param {string} message
 	 */
 	async #handleMessage(userstate, message) {

@@ -228,7 +228,7 @@ class Game {
 
 	/**
 	 * 
-	 * @param {import("tmi.js").ChatUserstate} userstate 
+	 * @param {import("@twurple/chat").ChatUser} userstate 
 	 * @param {LatLng} location
 	 */
 	async handleUserGuess(userstate, location) {
