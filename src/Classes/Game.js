@@ -232,7 +232,7 @@ class Game {
 	 * @param {LatLng} location
 	 */
 	async handleUserGuess(userstate, location) {
-		const dbUser = this.#db.getOrCreateUser(userstate['user-id'], userstate['display-name']);
+		const dbUser = this.#db.getOrCreateUser(userstate.userId, userstate.displayName);
 
 		const existingGuess = this.#db.getUserGuess(this.#roundId, dbUser.id);
 		if (!this.isMultiGuess && existingGuess) {
@@ -268,12 +268,12 @@ class Game {
 		const score = GameHelper.calculateScore(distance, this.mapScale);
 		let modified = false;
 
-		userstate.color = userstate.color || "#FFF";
+		const color = userstate.color || "#FFF";
 
 		// Modify guess or push it
 		if (this.isMultiGuess && existingGuess) {
 			this.#db.updateGuess(existingGuess.id, {
-				color: userstate.color,
+				color,
 				flag: dbUser.flag,
 				location,
 				country: guessedCountry,
@@ -284,7 +284,7 @@ class Game {
 			modified = true;
 		} else {
 			this.#db.createGuess(this.#roundId, dbUser.id, {
-				color: userstate.color,
+				color,
 				flag: dbUser.flag,
 				location,
 				country: guessedCountry,
@@ -299,9 +299,9 @@ class Game {
 
 		// Old shape, for the scoreboard UI
 		return {
-			user: userstate.username,
-			username: userstate["display-name"],
-			color: userstate.color,
+			user: userstate.userName,
+			username: userstate.displayName,
+			color,
 			flag: dbUser.flag,
 			position: location,
 			streak: streak?.count ?? 0,

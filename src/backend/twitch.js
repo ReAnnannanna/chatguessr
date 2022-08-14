@@ -75,4 +75,4 @@ class TwitchBackend extends EventEmitter {
 	}
 }
 
-module.exports = TwitchBackend;
+export default TwitchBackend;

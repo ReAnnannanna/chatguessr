@@ -1,5 +1,6 @@
 import { ipcMain } from "electron";
 import { once } from "events";
+import { ChatUser } from "@twurple/chat";
 import Game from "./Classes/Game";
 import GameHelper from "./utils/GameHelper";
 import Settings from "./utils/Settings";
@@ -313,17 +314,17 @@ class GameHandler {
 	}
 
 	/**
-	 * @param {import("@twurple/chat").ChatUser} userstate
+	 * @param {ChatUser} userstate
 	 * @param {string} message
 	 */
 	async #handleGuess(userstate, message) {
 		if (!message.startsWith("!g") || !this.#game.guessesOpen) return;
 		// Ignore guesses made by the broadcaster with the CG map: prevents seemingly duplicate guesses
-		if (userstate.username.toLowerCase() === settings.channelName.toLowerCase()) return;
+		if (userstate.userName === settings.channelName.toLowerCase()) return;
 
 		// Check if user is banned
 		const bannedUsers = this.#db.getBannedUsers();
-		const isBanned = bannedUsers.some((user) => user.username === userstate.username);
+		const isBanned = bannedUsers.some((user) => user.username === userstate.userName);
 		if (isBanned) return;
 
 		const location = GameHelper.parseCoordinates(message.replace(/^!g\s+/, ""));
@@ -336,24 +337,24 @@ class GameHandler {
 			if (!this.#game.isMultiGuess) {
 				this.#win.webContents.send("render-guess", guess);
 				if (settings.showHasGuessed) {
-					await this.#backend.sendMessage(`${flags.getEmoji(guess.flag)} ${userstate["display-name"]} has guessed`);
+					await this.#backend.sendMessage(`${flags.getEmoji(guess.flag)} ${userstate.displayName} has guessed`);
 				}
 			} else {
 				const guesses = this.#game.getMultiGuesses();
 				this.#win.webContents.send("render-multiguess", guesses);
 				if (!guess.modified) {
 					if (settings.showHasGuessed) {
-						await this.#backend.sendMessage(`${flags.getEmoji(guess.flag)} ${userstate["display-name"]} has guessed`);
+						await this.#backend.sendMessage(`${flags.getEmoji(guess.flag)} ${userstate.displayName} has guessed`);
 					}
 				} else {
-					await this.#backend.sendMessage(`${flags.getEmoji(guess.flag)} ${userstate["display-name"]} guess changed`);
+					await this.#backend.sendMessage(`${flags.getEmoji(guess.flag)} ${userstate.displayName} guess changed`);
 				}
 			}
 		} catch (err) {
 			if (err.code === "alreadyGuessed" && settings.showHasAlreadyGuessed) {
-				await this.#backend.sendMessage(`${userstate["display-name"]} you already guessed`);
+				await this.#backend.sendMessage(`${userstate.displayName} you already guessed`);
 			} else if (err.code === "pastedPreviousGuess") {
-				await this.#backend.sendMessage(`${userstate["display-name"]} you pasted your previous guess :)`);
+				await this.#backend.sendMessage(`${userstate.displayName} you pasted your previous guess :)`);
 			} else {
 				console.error(err);
 			}
@@ -366,19 +367,19 @@ class GameHandler {
 	#cgCooldown = false;
 
 	/**
-	 * @param {import("@twurple/chat").ChatUser} userstate
+	 * @param {ChatUser} userstate
 	 * @param {string} message
 	 */
 	async #handleMessage(userstate, message) {
 		if (!message.startsWith("!")) return;
 		message = message.trim().toLowerCase();
 
-		const userId = userstate.badges?.broadcaster === "1" ? "BROADCASTER" : userstate["user-id"];
+		const userId = userstate.badges.get("broadcaster") === "1" ? "BROADCASTER" : userstate.userId;
 
 		if (message === settings.userGetStatsCmd) {
 			const userInfo = this.#db.getUserStats(userId);
 			if (!userInfo) {
-				await this.#backend.sendMessage(`${userstate["display-name"]} you've never guessed yet.`);
+				await this.#backend.sendMessage(`${userstate.displayName} you've never guessed yet.`);
 			} else {
 				await this.#backend.sendMessage(`
 					${flags.getEmoji(userInfo.flag)} ${userInfo.username} : Current streak: ${userInfo.streak}.
@@ -429,7 +430,7 @@ class GameHandler {
 
 		if (message.startsWith("!flag")) {
 			const countryReq = message.slice(message.indexOf(" ") + 1).trim();
-			const dbUser = this.#db.getOrCreateUser(userId, userstate["display-name"]);
+			const dbUser = this.#db.getOrCreateUser(userId, userstate.displayName);
 
 			let newFlag;
 			if (countryReq === "none") {
@@ -439,7 +440,7 @@ class GameHandler {
 			} else {
 				newFlag = flags.selectFlag(countryReq);
 				if (!newFlag) {
-					await this.#backend.sendMessage(`${userstate["display-name"]} no flag found`);
+					await this.#backend.sendMessage(`${userstate.displayName} no flag found`);
 					return;
 				}
 			}
@@ -447,30 +448,30 @@ class GameHandler {
 			this.#db.setUserFlag(dbUser.id, newFlag);
 
 			if (countryReq === "none") {
-				await this.#backend.sendMessage(`${userstate["display-name"]} flag removed`);
+				await this.#backend.sendMessage(`${userstate.displayName} flag removed`);
 			} else if (countryReq === "random") {
-				await this.#backend.sendMessage(`${userstate["display-name"]} got ${flags.getEmoji(newFlag)}`);
+				await this.#backend.sendMessage(`${userstate.displayName} got ${flags.getEmoji(newFlag)}`);
 			}
 			return;
 		}
 
 		if (message === settings.userClearStatsCmd) {
 			// @ts-ignore
-			store.delete(`users.${userstate.username}`);
+			store.delete(`users.${userstate.userName}`);
 
 			const dbUser = this.#db.getUser(userId);
 			if (dbUser) {
 				this.#db.resetUserStats(dbUser.id);
-				await this.#backend.sendMessage(`${flags.getEmoji(dbUser.flag)} ${userstate["display-name"]} 🗑️ stats cleared !`);
+				await this.#backend.sendMessage(`${flags.getEmoji(dbUser.flag)} ${userstate.displayName} 🗑️ stats cleared !`);
 			} else {
-				await this.#backend.sendMessage(`${userstate["display-name"]} you've never guessed yet.`);
+				await this.#backend.sendMessage(`${userstate.displayName} you've never guessed yet.`);
 			}
 
 			return;
 		}
 
 		// streamer commands
-		if (userstate.badges?.broadcaster !== "1") {
+		if (userstate.badges.get("broadcaster") !== "1") {
 			return;
 		}
 		if (process.env.NODE_ENV !== "development") {
@@ -482,15 +483,11 @@ class GameHandler {
 			for (let i = 0; i < max; i += 1) {
 				const lat = Math.random() * 180 - 90;
 				const lng = Math.random() * 360 - 180;
-				await this.#handleGuess(
-					{
-						"user-id": `123450${i}`,
-						username: `fake_${i}`,
-						"display-name": `fake_${i}`,
-						color: `#${Math.random().toString(16).slice(2, 8).padStart(6, "0")}`,
-					},
-					`!g ${lat},${lng}`
-				);
+				await this.#handleGuess(new ChatUser(`fake_${i}`, new Map([
+					["user-id", `123450${i}`],
+					["display-name", `fake_${i}`],
+					["color", `#${Math.random().toString(16).slice(2, 8).padStart(6, "0")}`],
+				])), `!g ${lat},${lng}`);
 			}
 		}
 	}
