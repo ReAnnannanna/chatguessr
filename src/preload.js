@@ -61,6 +61,9 @@ function init(rendererApi) {
                 ipcRenderer.send("close-guesses");
             }
         },
+		onDownloadScores() {
+			ipcRenderer.send("download-round-scores");
+		},
     });
 
     // GAME ICONS

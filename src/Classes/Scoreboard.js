@@ -17,6 +17,7 @@ require("datatables.net-scroller/js/dataTables.scroller")(window, $);
 /**
  * @typedef {object} Options
  * @prop {(open: boolean) => void} onToggleGuesses
+ * @prop {() => void} onDownloadScores
  * @prop {(location: LatLng) => void} focusOnGuess
  */
 
@@ -60,6 +61,9 @@ class Scoreboard {
 					</thead>
 					<tbody id='guessList'></tbody>
 				</table>
+				<div class='scoreboardDownload'>
+					<button>📥</button>
+				</div>
 			</div>
 		`);
 		this.container.append(this.scoreboard);
@@ -91,6 +95,9 @@ class Scoreboard {
 
 		this.switchBtn.on("change", () => {
 			this.onToggleGuesses(this.switchBtn.is(":checked"));
+		});
+		this.scoreboard.find(".scoreboardDownload button").on("click", () => {
+			props.onDownloadScores();
 		});
 
 		/** @type {{ column: number, state: boolean }[]} */

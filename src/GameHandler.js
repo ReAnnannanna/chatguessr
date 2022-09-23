@@ -1,4 +1,5 @@
-import { ipcMain } from "electron";
+import { dialog, ipcMain } from "electron";
+import fs from "fs/promises";
 import { once } from "events";
 import Game from "./Classes/Game";
 import GameHelper from "./utils/GameHelper";
@@ -134,6 +135,22 @@ class GameHandler {
 		this.#backend.sendMessage(`🌎 Round ${round} has finished. Congrats ${flags.getEmoji(scores[0].flag)} ${scores[0].username} !`, { system: true });
 	}
 
+	async #downloadRoundScores() {
+		const scores = this.#game.getRoundScores();
+		const rows = scores.map(({ username, flag, distance, score, streak }) => [username, flag, distance, score, streak].join(','));
+		const csv = `username,flag,distance,score,streak\n${rows.join('\n')}`;
+
+		const { filePath, canceled } = await dialog.showSaveDialog(this.#win, {
+			filters: [{ name: 'CSV', extensions: ['csv'] }],
+			defaultPath: 'round.csv',
+		})
+		if (canceled) {
+			return;
+		}
+
+		await fs.writeFile(filePath, csv);
+	}
+
 	init() {
 		// Browser Listening
 		this.#win.webContents.on("did-navigate-in-page", (_event, url) => {
@@ -211,6 +228,10 @@ class GameHandler {
 
 		ipcMain.on("close-guesses", () => {
 			this.closeGuesses();
+		});
+
+		ipcMain.on("download-round-results", () => {
+			this.#downloadRoundScores();
 		});
 
 		ipcMain.on("game-form", (_event, isMultiGuess) => {
