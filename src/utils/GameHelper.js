@@ -1,5 +1,5 @@
-const axios = require("axios").default;
-const countryIso = require("coordinate_to_country");
+import axios from "axios";
+import countryIso from "coordinate_to_country";
 /**
  * Country code mapping for 2-character ISO codes that should be considered
  * part of another country for GeoGuessr streak purposes.
@@ -7,7 +7,7 @@ const countryIso = require("coordinate_to_country");
  * @type {Record<string, string>}
  */
 // @ts-ignore
-const countryCodes = require("./countryCodes.json");
+import countryCodes from "./countryCodes.json";
 
 const GEOGUESSR_URL = "https://geoguessr.com";
 const CG_API_URL = process.env.CG_API_URL ?? "https://chatguessr-api.vercel.app";
@@ -163,11 +163,13 @@ async function makeLink(accessToken, bot, streamer, mapName, mode, locations, to
 	return `${CG_PUBLIC_URL}/game/${res.data.code}`;
 }
 
-exports.isGameURL = isGameURL;
-exports.fetchSeed = fetchSeed;
-exports.getCountryCode = getCountryCode;
-exports.parseCoordinates = parseCoordinates;
-exports.calculateScale = calculateScale;
-exports.haversineDistance = haversineDistance;
-exports.calculateScore = calculateScore;
-exports.makeLink = makeLink;
+export {
+	isGameURL,
+	fetchSeed,
+	getCountryCode,
+	parseCoordinates,
+	calculateScale,
+	haversineDistance,
+	calculateScore,
+	makeLink,
+};

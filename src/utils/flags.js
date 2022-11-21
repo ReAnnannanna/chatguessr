@@ -1,11 +1,9 @@
-'use strict';
-
-const path = require("path");
-const fs = require("fs/promises");
-const { app } = require("electron");
-const builtinFlags = require('./builtinFlags.json');
-const countryCodesNames = require("./countryCodesNames.json");
-const { matchSorter } = require("match-sorter");
+import path from "path";
+import fs from "fs/promises";
+import { app } from "electron";
+import builtinFlags from './builtinFlags.json';
+import countryCodesNames from "./countryCodesNames.json";
+import { matchSorter } from "match-sorter";
 
 // The fallback to `/tmp/` is so this module can be used in tests outside electron.
 const appDataDir = app?.getPath("userData") ?? '/tmp/';
@@ -146,9 +144,11 @@ function getEmoji(value) {
 	return flag?.emoji ?? '';
 }
 
-exports.load = loadCustomFlagMetadata;
-exports.findFlagFile = findFlagFile;
-exports.selectFlag = selectFlag;
-exports.randomCountryFlag = randomCountryFlag;
-exports.getEmoji = getEmoji;
-exports.TEST_setCustomFlags = setCustomFlags;
+export {
+	loadCustomFlagMetadata as load,
+	findFlagFile,
+	selectFlag,
+	randomCountryFlag,
+	getEmoji,
+	setCustomFlags as TEST_setCustomFlags,
+};

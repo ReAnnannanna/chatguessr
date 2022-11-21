@@ -1,9 +1,5 @@
-"use strict";
-
-require("./errorReporting");
-
-const { contextBridge, ipcRenderer } = require("electron");
-
+import "./errorReporting";
+import { contextBridge, ipcRenderer } from "electron";
 import { qs, createEl } from "./utils/domUtils";
 
 /** @typedef {import('./types').LatLng} LatLng */
@@ -27,9 +23,9 @@ const REMOVE_COMPASS_CSS = '.compass, .game-layout__compass, [class^="panorama-c
 /**
  * @param {import('./types').RendererApi} rendererApi
  */
-function init(rendererApi) {
-	const Scoreboard = require("./Classes/Scoreboard");
-	const sharedStore = require("./utils/sharedStore");
+async function init(rendererApi) {
+	const { default: Scoreboard } = await import("./Classes/Scoreboard");
+	const { default: sharedStore } = await import("./utils/sharedStore");
 
 	/** @type {Boolean} */
 	const isNoCar = sharedStore.get("isNoCar", false);

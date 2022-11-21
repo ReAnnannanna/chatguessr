@@ -1,14 +1,12 @@
-'use strict';
-
-const pMap = require("p-map");
-const GameHelper = require("../utils/GameHelper");
-const store = require("../utils/sharedStore");
+import pMap from "p-map";
+import * as GameHelper from "../utils/GameHelper";
+import store from "../utils/sharedStore";
 
 /** @typedef {import('../types').LatLng} LatLng */
 /** @typedef {import('../types').Location} Location */
 /** @typedef {import('../types').Seed} Seed */
 /** @typedef {import('../types').Guess} Guess */
-/** @typedef {import('../utils/Settings')} Settings */
+/** @typedef {import('../utils/Settings').default} Settings */
 
 /**
  * @param {LatLng} a
@@ -19,7 +17,7 @@ function latLngEqual(a, b) {
 }
 
 class Game {
-	/** @type {import('../utils/Database')} */
+	/** @type {import('../utils/Database').default} */
 	#db;
 
 	/**
@@ -61,7 +59,7 @@ class Game {
 	isMultiGuess = false;
 
 	/**
-	 * @param {import('../utils/Database')} db
+	 * @param {import('../utils/Database').default} db
 	 * @param {Settings} settings
 	 */
 	constructor(db, settings) {
@@ -379,4 +377,4 @@ class Game {
 	}
 }
 
-module.exports = Game;
+export default Game;

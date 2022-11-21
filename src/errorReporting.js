@@ -1,11 +1,9 @@
-'use strict';
-
-const path = require("path");
-const findUp = require('find-up');
-const Sentry = require('@sentry/electron');
-const dotenv = require('dotenv');
-const { version } = require('../package.json');
-const { accessSync } = require("fs");
+import path from "path";
+import { accessSync } from "fs";
+import findUp from 'find-up';
+import Sentry from '@sentry/electron';
+import dotenv from 'dotenv';
+import { version } from '../package.json';
 
 const envPath = findUp.sync(".env") ?? path.join(__dirname, "../.env");
 try {

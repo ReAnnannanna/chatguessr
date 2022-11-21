@@ -1,6 +1,4 @@
-'use strict';
-
-const ElectronStore = require("electron-store");
+import ElectronStore from "electron-store";
 
 /**
  * @typedef {object} LegacyUser
@@ -33,4 +31,4 @@ const ElectronStore = require("electron-store");
 /** @type {ElectronStore<Schema>} */
 const store = new ElectronStore();
 
-module.exports = store;
+export default store;

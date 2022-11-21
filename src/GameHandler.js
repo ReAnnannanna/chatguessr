@@ -1,10 +1,10 @@
 import { ipcMain } from "electron";
 import { once } from "events";
 import Game from "./Classes/Game";
-import GameHelper from "./utils/GameHelper";
+import * as GameHelper from "./utils/GameHelper";
 import Settings from "./utils/Settings";
 import TwitchBackend from "./backend/twitch";
-import flags from "./utils/flags";
+import * as flags from "./utils/flags";
 import createSettingsWindow from "./Windows/settings/SettingsWindow";
 import store from "./utils/sharedStore";
 import { io } from "socket.io-client";
@@ -14,8 +14,7 @@ const settings = Settings.read();
 
 /** @typedef {import('./types').Guess} Guess */
 /** @typedef {import('./types').Location} Location */
-/** @typedef {import('./utils/Database')} Database */
-/** @typedef {import('./Windows/MainWindow')} MainWindow */
+/** @typedef {import('./utils/Database').default} Database */
 /** @typedef {import('electron').BrowserWindow} BrowserWindow */
 /** @typedef {import('socket.io-client').Socket} Socket */
 
@@ -24,7 +23,7 @@ class GameHandler {
 	#db;
 
 	/**
-	 * @type {MainWindow}
+	 * @type {BrowserWindow}
 	 */
 	#win;
 
@@ -57,7 +56,7 @@ class GameHandler {
 
 	/**
 	 * @param {Database} db
-	 * @param {MainWindow} win
+	 * @param {BrowserWindow} win
 	 * @param {{ requestAuthentication: () => Promise<void> }} options
 	 */
 	constructor(db, win, options) {

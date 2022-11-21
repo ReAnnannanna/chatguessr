@@ -1,22 +1,23 @@
-"use strict";
+import "./errorReporting";
+import "./autoUpdate.js";
+import path from "path";
+import process from "process";
+import { fileURLToPath } from "url";
+import { app, BrowserWindow, ipcMain, protocol } from "electron";
+import { initRenderer } from "electron-store";
+import GameHandler from "./GameHandler";
+import * as flags from "./utils/flags";
+import Database from "./utils/Database";
+import sharedStore from "./utils/sharedStore";
+import Settings from "./utils/Settings";
+import { supabase } from "./utils/supabase";
+import createAuthWindow from "./Windows/auth/AuthWindow";
+import axios from "axios";
+import shouldExit from "electron-squirrel-startup";
 
-require("./errorReporting");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-if (process.platform == "win32") require("update-electron-app")();
-
-const path = require("path");
-const { app, BrowserWindow, ipcMain, protocol } = require("electron");
-const { initRenderer } = require("electron-store");
-const GameHandler = require("./GameHandler").default;
-const flags = require("./utils/flags");
-const Database = require("./utils/Database");
-const sharedStore = require("./utils/sharedStore");
-const Settings = require("./utils/Settings");
-const { supabase } = require("./utils/supabase");
-const createAuthWindow = require("./Windows/auth/AuthWindow");
-const axios = require("axios").default;
-
-if (require("electron-squirrel-startup")) {
+if (shouldExit) {
 	app.quit();
 }
 
@@ -48,8 +49,8 @@ async function serveFlags() {
 	});
 }
 
-function createWindow() {
-	const mainWindow = require("./Windows/MainWindow");
+async function createWindow() {
+	const { default: mainWindow } = await import("./Windows/MainWindow");
 
 	mainWindow.once("ready-to-show", () => {
 		mainWindow.show();
@@ -127,53 +128,49 @@ async function authenticateWithTwitch(gameHandler, parentWindow) {
 	});
 }
 
-async function init() {
-	initRenderer();
+initRenderer();
 
-	await app.whenReady()
-	serveAssets();
-	await serveFlags();
+await app.whenReady()
+serveAssets();
+await serveFlags();
 
-	const mainWindow = createWindow();
+const mainWindow = await createWindow();
 
-	app.on("activate", () => {
-		// On OS X it's common to re-create a window in the app when the
-		// dock icon is clicked and there are no other windows open.
-		if (BrowserWindow.getAllWindows().length === 0) {
-			createWindow();
-		}
-	});
+app.on("activate", () => {
+	// On OS X it's common to re-create a window in the app when the
+	// dock icon is clicked and there are no other windows open.
+	if (BrowserWindow.getAllWindows().length === 0) {
+		createWindow();
+	}
+});
 
-	// Quit when all windows are closed, except on macOS. There, it's common
-	// for applications and their menu bar to stay active until the user quits
-	// explicitly with Cmd + Q.
-	app.on("window-all-closed", () => {
-		// temporary fix for macOS on closed app issue
-		// if (process.platform !== "darwin") {
-		app.quit();
-		// }
-	});
+// Quit when all windows are closed, except on macOS. There, it's common
+// for applications and their menu bar to stay active until the user quits
+// explicitly with Cmd + Q.
+app.on("window-all-closed", () => {
+	// temporary fix for macOS on closed app issue
+	// if (process.platform !== "darwin") {
+	app.quit();
+	// }
+});
 
-	const gameHandler = new GameHandler(db, mainWindow, {
-		async requestAuthentication () {
-			await authenticateWithTwitch(gameHandler, mainWindow);
-		},
-	});
-	ipcMain.handle("get-connection-state", () => gameHandler.getConnectionState());
-	ipcMain.handle("replace-session", async () => {
-		await supabase.auth.signOut();
+const gameHandler = new GameHandler(db, mainWindow, {
+	async requestAuthentication () {
 		await authenticateWithTwitch(gameHandler, mainWindow);
-	});
-	
-	supabase.auth.onAuthStateChange((event, session) => {
-		if (event === "SIGNED_IN") {
-			sharedStore.set("session", session);
-		} else if (event === "SIGNED_OUT") {
-			sharedStore.delete("session");
-		}
-	});
-
+	},
+});
+ipcMain.handle("get-connection-state", () => gameHandler.getConnectionState());
+ipcMain.handle("replace-session", async () => {
+	await supabase.auth.signOut();
 	await authenticateWithTwitch(gameHandler, mainWindow);
-}
+});
 
-init();
+supabase.auth.onAuthStateChange((event, session) => {
+	if (event === "SIGNED_IN") {
+		sharedStore.set("session", session);
+	} else if (event === "SIGNED_OUT") {
+		sharedStore.delete("session");
+	}
+});
+
+await authenticateWithTwitch(gameHandler, mainWindow);

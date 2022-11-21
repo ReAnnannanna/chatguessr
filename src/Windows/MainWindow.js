@@ -1,18 +1,16 @@
-"use strict";
+import path from "node:path";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
+import { BrowserWindow, shell } from "electron";
+import styles from "bundle-text:../../assets/styles.css";
 
-const path = require("path");
-const fs = require("fs");
-const { BrowserWindow, shell } = require("electron");
-/** @type {string} */
-// @ts-ignore
-const styles = require("bundle-text:../../assets/styles.css");
-const js = fs.readFileSync(path.join(__dirname, "../../dist/cg-renderer/renderer.js"), "utf8");
+const js = fs.readFileSync(new URL("../../dist/cg-renderer/renderer.js", import.meta.url), "utf8");
 
 function mainWindow() {
 	let win = new BrowserWindow({
 		show: false,
 		webPreferences: {
-			preload: path.join(__dirname, "../../dist/cg-preload/preload.js"),
+			preload: fileURLToPath(new URL("../../dist/cg-preload/preload.js", import.meta.url)),
 			contextIsolation: true,
 			nodeIntegration: false,
 			webSecurity: false,
@@ -41,4 +39,4 @@ function mainWindow() {
 	return win;
 }
 
-module.exports = mainWindow();
+export default mainWindow();

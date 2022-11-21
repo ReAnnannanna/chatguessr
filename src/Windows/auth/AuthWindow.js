@@ -1,7 +1,5 @@
-"use strict";
-
-const path = require("path");
-const { BrowserWindow, shell } = require("electron");
+import path from "path";
+import { BrowserWindow, shell } from "electron";
 
 /**
  * @param {BrowserWindow} parentWindow
@@ -52,4 +50,4 @@ async function createAuthWindow(parentWindow, options) {
 	return win;
 }
 
-module.exports = createAuthWindow;
+export default createAuthWindow;

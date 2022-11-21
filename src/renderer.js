@@ -1,6 +1,4 @@
-"use strict";
-
-require("./utils/extenssrMenuItemsPlugin");
+import "./utils/extenssrMenuItemsPlugin";
 
 window.chatguessrApi.init({
 	populateMap,

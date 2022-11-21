@@ -1,7 +1,9 @@
 {
 	"extends": "@tsconfig/node16",
 	"compilerOptions": {
-		"lib": ["es2021", "dom", "dom.iterable"],
+		"lib": ["es2022", "dom", "dom.iterable"],
+		"module": "es2022",
+		"target": "es2022",
 		"noEmit": true,
 		"strict": false,
 		"allowJs": true,

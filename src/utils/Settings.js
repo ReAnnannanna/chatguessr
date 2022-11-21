@@ -1,6 +1,4 @@
-"use strict";
-
-const store = require("./sharedStore");
+import store from "./sharedStore";
 
 /**
  * @typedef {object} SettingsProps
@@ -96,4 +94,4 @@ class Settings {
 	}
 }
 
-module.exports = Settings;
+export default Settings;

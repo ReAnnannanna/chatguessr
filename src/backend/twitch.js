@@ -1,5 +1,5 @@
-const { EventEmitter } = require("events");
-const TwitchClient = require("tmi.js").Client;
+import { EventEmitter } from "events";
+import { Client as TwitchClient } from "tmi.js";
 
 class TwitchBackend extends EventEmitter {
 	/** @type {TwitchClient} */
@@ -82,4 +82,4 @@ class TwitchBackend extends EventEmitter {
 	}
 }
 
-module.exports = TwitchBackend;
+export default TwitchBackend;

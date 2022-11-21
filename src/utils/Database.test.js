@@ -1,7 +1,7 @@
 "use strict";
 
 const { randomUUID } = require("crypto");
-const Database = require("./Database");
+const Database = require("./Database").default;
 
 /** @type {Database} */
 let db;

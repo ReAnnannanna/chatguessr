@@ -1,7 +1,5 @@
-"use strict";
-
-const SQLite = require("better-sqlite3");
-const { randomUUID } = require("crypto");
+import SQLite from "better-sqlite3";
+import { randomUUID } from "crypto";
 
 /** @typedef {import('../types').LatLng} LatLng */
 
@@ -841,4 +839,4 @@ class Database {
 	}
 }
 
-module.exports = Database;
+export default Database;
