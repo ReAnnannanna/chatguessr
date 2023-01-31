@@ -7,7 +7,7 @@ const countryIso = require("coordinate_to_country");
  * @type {Record<string, string>}
  */
 // @ts-ignore
-const countryCodes = require("./countryCodes.json");
+const countryStreakAliases = require("./countryStreakAliases.json");
 
 const GEOGUESSR_URL = "https://geoguessr.com";
 const CG_API_URL = process.env.CG_API_URL ?? "https://chatguessr-api.vercel.app";
@@ -68,7 +68,7 @@ async function getCountryCode(location) {
 	if (!localIso) {
 		return;
 	}
-	return countryCodes[localIso];
+	return countryStreakAliases[localIso];
 }
 
 /**

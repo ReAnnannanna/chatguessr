@@ -14,7 +14,7 @@
 		"src/modules.d.ts",
 		"src/types.d.ts",
 		"src/**/*.js",
-		"src/utils/countryCodes.json",
+		"src/utils/countryStreakAliases.json",
 		"src/utils/countryCodesNames.json"
 	],
 	"exclude": []

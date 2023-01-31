@@ -177,7 +177,13 @@ const migrations = [
 	},
 	function createLastStreakField(db) {
 		db.prepare(`ALTER TABLE guesses ADD COLUMN last_streak INTEGER DEFAULT NULL`).run();
-	}
+	},
+	/** Previously we used the "IL" streak code for rounds identified as either Israel or Palestine, which is a bit uncool.
+	 * We still want to match GeoGuessr where the two are the same for streak purposes. We can use "ILPS" for this. */
+	function updateIlpsStreakValue(db) {
+		db.prepare(`UPDATE rounds SET country = "ILPS" WHERE country = "IL"`).run();
+		db.prepare(`UPDATE guesses SET country = "ILPS" WHERE country = "IL"`).run();
+	},
 ];
 
 class Database {
