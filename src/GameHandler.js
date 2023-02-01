@@ -1,6 +1,7 @@
 import { dialog, ipcMain } from "electron";
 import fs from "fs/promises";
 import { once } from "events";
+import Papa from "papaparse";
 import Game from "./Classes/Game";
 import GameHelper from "./utils/GameHelper";
 import Settings from "./utils/Settings";
@@ -137,8 +138,15 @@ class GameHandler {
 
 	async #downloadRoundScores() {
 		const scores = this.#game.getRoundScores();
-		const rows = scores.map(({ username, flag, distance, score, streak }) => [username, flag, distance, score, streak].join(','));
-		const csv = `username,flag,distance,score,streak\n${rows.join('\n')}`;
+		const csv = Papa.unparse(scores, {
+			columns: [
+				"username",
+				"flag",
+				"distance",
+				"score",
+				"streak",
+			],
+		});
 
 		const { filePath, canceled } = await dialog.showSaveDialog(this.#win, {
 			filters: [{ name: 'CSV', extensions: ['csv'] }],
