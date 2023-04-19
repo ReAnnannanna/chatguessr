@@ -491,7 +491,7 @@ class Database {
 	}
 
 	/**
-	 * Get all the participants for a round, sorted by time. No scores included.
+	 * Get all the participants for a round, sorted by time, from newest to oldest. No scores included.
 	 *
 	 * @param {string} roundId
 	 */
@@ -504,7 +504,7 @@ class Database {
 				guesses.flag
 			FROM guesses, users
 			WHERE round_id = ? AND users.id = guesses.user_id
-			ORDER BY created_at ASC
+			ORDER BY created_at DESC
 		`);
 
 		/** @type {{ id: string, username: string, color: string, flag: string }[]} */

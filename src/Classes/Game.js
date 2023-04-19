@@ -345,7 +345,7 @@ class Game {
 	}
 
 	/**
-	 * Get the participants for the current round, sorted by who guessed first.
+	 * Get the participants for the current round, sorted from newest to oldest guess.
 	 */
 	getMultiGuesses() {
 		return this.#db.getRoundParticipants(this.#roundId);

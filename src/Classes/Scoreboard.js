@@ -232,7 +232,7 @@ class Scoreboard {
         this.isResults = false;
         this.setTitle("GUESSES (0)");
         if (this.isMultiGuess) {
-            this.#setHint("Ordered by guess time");
+            this.#setHint("Newest guess on top");
         } else {
             this.#setHint(null);
         }
