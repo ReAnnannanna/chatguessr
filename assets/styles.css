@@ -20,19 +20,16 @@
     margin-top: 0 !important;
 }
 
-/* Hides friends list bar */
-[class^="version4_sidebar__"] {
-    display: none;
-}
-
-/* New UI fix */
+/* Hide unnecessary elements */
+[class^="version4_sidebar__"], /* Friends list */
 .result-overlay_overlay__78Dlz,
 .result-overlay_overlayContent__oe0KJ,
 .result-overlay_overlayXpBar__kB5pW,
 .standard-final-result_challengeFriendButton__VgXlv,
-.slanted-button_container__6JmyZ {
-    display: none !important;
-}
+[class^="promo-deal-button_"], /* Avatar shop */
+.slanted-button_container__6JmyZ /* Missions flag */
+{ display: none !important; }
+
 /* removes game breakdown button */
 .standard-final-result_newWrapper__moI82 > div:first-child {
     display: none;
