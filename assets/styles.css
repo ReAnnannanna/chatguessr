@@ -13,15 +13,15 @@
 [data-qa="game-type-single-player"] {
     display: none !important;
 }
-.play_map__V7bDj {
+[class^="play_map__"] {
     height: 9rem !important;
 }
-.start-standard-game_body__tAIZs {
+[class^="start-standard-game_body__"] {
     margin-top: 0 !important;
 }
 
 /* Hides friends list bar */
-.version4_sidebar__5CRI_ {
+[class^="version4_sidebar__"] {
     display: none;
 }
 
@@ -43,7 +43,7 @@
 
 /* CUSTOM SLIDER FOR SCRIPTS */
 .custom-slider {
-    -webkit-appearance: none;
+    appearance: none;
     width: 100%;
     height: 0.5rem;
     border-radius: 0.625rem;
@@ -52,11 +52,10 @@
     padding: 0;
     border: none;
     outline: none;
-    -webkit-transition: 0.2s;
     transition: opacity 0.2s;
 }
 .custom-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
+    appearance: none;
     box-shadow: inset 0 0.0625rem 0 0 #a19bd9;
     appearance: none;
     width: 1.5rem;
@@ -465,12 +464,11 @@ input:checked + .switch:before {
     vertical-align: super;
     height: 3px;
     padding: 0;
-    -webkit-appearance: none;
+    appearance: none;
     width: calc(100% - 12px);
     background: #fff;
     outline: 0;
     opacity: 0.2;
-    -webkit-transition: 0.3s;
     transition: opacity 0.3s;
     direction: rtl;
 }
@@ -478,7 +476,6 @@ input:checked + .switch:before {
     opacity: 1;
 }
 #scrollSpeedSlider::-webkit-slider-thumb {
-    -webkit-appearance: none;
     appearance: none;
     width: 30px;
     height: 7px;
